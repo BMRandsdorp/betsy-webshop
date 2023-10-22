@@ -24,7 +24,8 @@ def main():
         # remove_product(6)
     """
 
-# search products containing term (case sensitive)
+
+# search products containing term
 def search(term):
     # check term for spelling errors
     spell = SpellChecker()
@@ -43,9 +44,8 @@ def search(term):
 
 
 # View the products of a given user.
-# get user.products list
 def list_user_products(user_id):
-    query = models.User.select()   # .where(models.User.id == user_id)
+    query = models.User.select()
     user_product_list = []
     for user in query:
         if user.id == user_id:
@@ -71,8 +71,6 @@ def list_products_per_tag(tag_id):
 # create new product and add to user.products Add a product to a user.
 def add_product_to_catalog(user_id, product):
     # create var new product first, create product in model
-    print(product)
-    # get_or_create() in case product exists?
     new_product = models.Product.create(
         name=product[0],
         description=product[1],
@@ -83,9 +81,7 @@ def add_product_to_catalog(user_id, product):
     for tag in product[4]:
         add_tag, created = models.Tag.get_or_create(name=tag)
         tag_list.append(add_tag)
-    print(tag_list)
     new_product.tags.add(tag_list)
-    print(new_product)
 
     # query user model to get user by id and add newest product
     query = models.User.select()
@@ -99,19 +95,9 @@ def update_stock(product_id, new_quantity):
     query = models.Product.update(quantity=new_quantity).where(models.Product.id == product_id)
     query.execute()
     print("updated stock")
-    """
-        # query = models.Product.select()
-        print(query[product_id])
-
-        for product in query[product_id]:
-            product.quantity = new_quantity
-
-        # print(query[product_id])
-    """
 
 
 # Handle a purchase between a buyer and a seller for a given product
-# move product x amount to buyer from seller and register amount in transaction model
 def purchase_product(product_id, buyer_id, quantity):
     user_query = models.User.select()
     product_query = models.Product.select()
@@ -136,14 +122,14 @@ def purchase_product(product_id, buyer_id, quantity):
                 # update leftover product quantity
                 new_quantity = product.quantity - quantity
                 update_stock(product_id, new_quantity)
-                # < move product x quantity to buyer
+                # add bought product to buyer
                 for user in user_query:
                     if user.id == buyer_id:
                         user.products.add(bought_product)
                         models.Transaction.create(buyer=buyer_id, product=product_id, amount=quantity)
                 print(f"sold {quantity} amount of {product}")
             if product.quantity == quantity:
-                # == move product id from seller to buyer
+                # move product from seller to buyer
                 for user in user_query:
                     for product in user.products:
                         if product.id == product_id:
@@ -154,14 +140,11 @@ def purchase_product(product_id, buyer_id, quantity):
                         user.products.add(product_id)
                 # register sale
                 models.Transaction.create(buyer=buyer_id, product=product_id, amount=quantity)
-                # register_sale.execute()
                 print("sold entire stock to buyer")
 
 
 # Remove a product from a user. Get user if product_id is in User.products and remove
 def remove_product(product_id):
-    # query = models.Product.delete().where(models.Product.id == product_id)
-    # query = models.User.products.remove().where(product_id in models.User.products)
     query = models.User.select()
     for user in query:
         for product in user.products:
