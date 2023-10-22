@@ -3,8 +3,8 @@ import os
 
 
 def main():
+    delete_database()
     populate_test_database()
-    # delete_database()
 
 
 def populate_test_database():
@@ -32,7 +32,7 @@ def populate_test_database():
         "sport",
         ]
 
-# map tags b4 create to itterate over in product_tags
+    # map tags b4 create to itterate over in product_tags
     tags_map = {
         n: models.Tag.create(name=n)
         for n in tags
@@ -40,7 +40,7 @@ def populate_test_database():
 
     products = [
         ["Jacket", "jacket for winter or ski vacation", 55.5, 1, ["clothes", "sport"]],
-        ["Couch", "black leather couch, with some small wear and tear", 179.99, 1, ["antique", "vintage"]],
+        ["Couch", "black leather couch, with some small wear and tear", 179.99, 1, ["furniture", "antique", "vintage"]],
         ["Handmixer", "antique handmixer, still works after years of use", 59.99, 1, ["art", "kitchenwares"]],
         ["Tie dye shirt", "collection of various tie dye tshirts made at woodstock 69", 12.99, 6, ["clothes", "art", "vintage"]],
         ["Stone drill", "electric drill, can be used on concrete and brick walls", 75.50, 1, ["tools"]],
@@ -48,20 +48,8 @@ def populate_test_database():
         ["Snowboard", "snowboard used on the slopes for total of a month", 55, 1, ["sport"]],
         ]
 
-# map products b4 create to make itteratable
-    """
-    product_map = {
-        for data in products:
-            product = models.Product.create(
-            name=data[0],
-            description=data[1],
-            price_per_unit=data[2],
-            quantity=data[3],
-            )
-            product_tags = [tags_map[x] for x in data[4]]
-            product.tags.add(product_tags)
-    }
-    """
+    # create map products to make itteratable version
+    product_map = {}
 
     for product_data in products:
         product = models.Product.create(
@@ -70,6 +58,10 @@ def populate_test_database():
             price_per_unit=product_data[2],
             quantity=product_data[3],
             )
+
+        # fill product map
+        product_map[product_data[0]] = product
+
         product_tags = [tags_map[x] for x in product_data[4]]
         product.tags.add(product_tags)
 
@@ -86,7 +78,7 @@ def populate_test_database():
             address=user_data[1],
             billing_info=user_data[2]
             )
-        user_products = [product in user_data[3]]  # product map to itterate over for user_products
+        user_products = [product_map[x] for x in user_data[3]]
         user.products.add(user_products)
 
     transactions = [

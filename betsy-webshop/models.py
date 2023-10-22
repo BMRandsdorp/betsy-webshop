@@ -7,7 +7,7 @@ db = peewee.SqliteDatabase("database.db")
 
 # tag model
 class Tag(peewee.Model):
-    name = peewee.CharField()
+    name = peewee.CharField(unique=True)
 
     class Meta:
         database = db
@@ -17,13 +17,15 @@ class Tag(peewee.Model):
 class Product(peewee.Model):
     name = peewee.CharField()
     description = peewee.CharField()
-    price_per_unit = peewee.FloatField()  # backref= gebruiken?
+    price_per_unit = peewee.DecimalField()
     quantity = peewee.IntegerField()
     tags = peewee.ManyToManyField(Tag)
 
     class Meta:
         database = db
 
+
+Product.add_index(Product.name, Product.description, Product.tags)
 # store price of product, no rounding errors # no duplicate tags
 
 
